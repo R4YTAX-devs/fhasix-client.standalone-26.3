@@ -1,6 +1,5 @@
 package com.fhasix.uitheme;
 
-import com.fhasix.uitheme.mixin.SimpleOptionAccessor;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.Minecraft;
@@ -25,7 +24,7 @@ final class NewFovChanger {
     }
 
     private static void set(OptionInstance<Integer> opt, int v) {
-        ((SimpleOptionAccessor<Integer>) (Object) opt).fhasix$setValue(v);
+        OptSet.set(opt, v);
     }
 
     private static void tick(Minecraft c) {
@@ -34,6 +33,9 @@ final class NewFovChanger {
         }
         if (!NewModSettings.isEnabled(c, ID)) {
             restore(c);
+            return;
+        }
+        if (NewZoom.optionZoomActive()) {
             return;
         }
         OptionInstance<Integer> fov = c.options.fov();

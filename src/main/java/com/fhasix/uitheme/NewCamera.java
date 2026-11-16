@@ -27,6 +27,13 @@ public final class NewCamera {
     private static float yaw;
     private static float pitch;
     private static CameraType previous;
+    private static float lockYaw;
+    private static float lockPitch;
+    private static float lastYaw;
+    private static float lastPitch;
+    private static boolean haveLast;
+    /** Set by NewLookMixin the first time Entity.turn is really hooked; then the frame fallback below stays idle. */
+    public static volatile boolean turnHookSeen = false;
 
     private NewCamera() {
     }
@@ -44,6 +51,8 @@ public final class NewCamera {
             active = true;
             yaw = c.player.getYRot();
             pitch = c.player.getXRot();
+            lockYaw = yaw;
+            lockPitch = pitch;
             previous = c.options.getCameraType();
             if (NewModSettings.optBool(c, ID, "third")) {
                 c.options.setCameraType(CameraType.THIRD_PERSON_BACK);
@@ -53,6 +62,54 @@ public final class NewCamera {
             if (previous != null && NewModSettings.optBool(c, ID, "third")) {
                 c.options.setCameraType(previous);
             }
+        }
+    }
+
+    /**
+     * Runs every frame. If the Entity.turn hook is not working on this Minecraft version, mouse movement
+     * turns the player; here that turn is moved over to the camera (free look) or scaled down (zoom).
+     */
+    static void frame(Minecraft c) {
+        if (c.player == null || turnHookSeen) {
+            return;
+        }
+        if (active) {
+            float dy = c.player.getYRot() - lockYaw;
+            float dp = c.player.getXRot() - lockPitch;
+            if (dy != 0f || dp != 0f) {
+                yaw += dy;
+                pitch = Math.max(-90f, Math.min(90f, pitch + dp));
+                c.player.setYRot(lockYaw);
+                c.player.setXRot(lockPitch);
+            }
+            haveLast = false;
+            return;
+        }
+        double s = NewZoom.sensitivityScale();
+        if (s < 0.999) {
+            if (haveLast) {
+                float dy = c.player.getYRot() - lastYaw;
+                float dp = c.player.getXRot() - lastPitch;
+                if (dy != 0f || dp != 0f) {
+                    c.player.setYRot(lastYaw + (float) (dy * s));
+                    c.player.setXRot(Math.max(-90f, Math.min(90f, lastPitch + (float) (dp * s))));
+                }
+            }
+            lastYaw = c.player.getYRot();
+            lastPitch = c.player.getXRot();
+            haveLast = true;
+        } else {
+            haveLast = false;
+        }
+    }
+
+    /** Called once per frame from the HUD. Never throws. */
+    static void frameAll(Minecraft c) {
+        try {
+            frame(c);
+            NewZoom.frame(c);
+        } catch (Exception | LinkageError t) {
+            NewSafe.failed("frame_fallbacks", t);
         }
     }
 

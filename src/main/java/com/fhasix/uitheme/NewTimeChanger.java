@@ -7,7 +7,7 @@ import net.minecraft.client.Minecraft;
  * Time Changer: locks the time of day you SEE (client side only - the server clock is untouched).
  * 0 = sunrise, 6000 = noon, 12000 = sunset, 18000 = midnight.
  */
-final class NewTimeChanger {
+public final class NewTimeChanger {
 
     static final String ID = "time_changer";
     private static java.lang.reflect.Method setter;
@@ -41,5 +41,19 @@ final class NewTimeChanger {
                 }
             }
         }));
+    }
+
+    /** Called by NewClockMixin: the world clock reading with the chosen time of day swapped in (visual only). */
+    public static long override(long original) {
+        try {
+            Minecraft c = Minecraft.getInstance();
+            if (c == null || c.level == null || !NewModSettings.isEnabled(c, ID)) {
+                return original;
+            }
+            long t = Math.floorMod((long) NewModSettings.opt(c, ID, "time"), 24000L);
+            return original - Math.floorMod(original, 24000L) + t;
+        } catch (Exception | LinkageError e) {
+            return original;
+        }
     }
 }

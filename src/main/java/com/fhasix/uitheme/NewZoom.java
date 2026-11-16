@@ -20,6 +20,9 @@ public final class NewZoom {
     /** ln(zoom factor): 0 = not zoomed. Working in ln space makes zooming in and out feel even. */
     private static double cur = 0.0;
     private static long lastNs = 0L;
+    private static int hookCount = 0;
+    private static int seenHook = 0;
+    private static Integer savedFov;
 
     private NewZoom() {
     }
@@ -28,11 +31,47 @@ public final class NewZoom {
         zoomKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.fhasixuitheme.zoom", InputConstants.Type.KEYBOARD, InputConstants.KEY_C, category));
         ClientTickEvents.END_CLIENT_TICK.register(NewSafe.tick("zoom", NewZoom::tick));
+        net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents.CLIENT_STOPPING.register(c -> NewSafe.run("zoom", () -> restoreFov(c)));
     }
 
     private static void tick(Minecraft c) {
         held = c.player != null && c.gui.screen() == null
                 && NewModSettings.isEnabled(c, ID) && zoomKey != null && zoomKey.isDown();
+    }
+
+    /** True while the fallback below is holding the FOV option down (FOV Changer must not fight it). */
+    static boolean optionZoomActive() {
+        return savedFov != null;
+    }
+
+    private static void restoreFov(Minecraft c) {
+        if (savedFov != null && c != null && c.options != null) {
+            OptSet.set(c.options.fov(), savedFov);
+            savedFov = null;
+        }
+    }
+
+    /** Per-frame fallback: if getFov is not hooked on this version, zoom by lowering the FOV option instead. */
+    static void frame(Minecraft c) {
+        if (c.options == null) {
+            return;
+        }
+        boolean hookAlive = hookCount != seenHook;
+        seenHook = hookCount;
+        if (hookAlive || c.player == null || !NewModSettings.isEnabled(c, ID)) {
+            restoreFov(c);
+            return;
+        }
+        double f = factor(c);
+        if (f < 1.0005) {
+            restoreFov(c);
+            return;
+        }
+        net.minecraft.client.OptionInstance<Integer> fov = c.options.fov();
+        if (savedFov == null) {
+            savedFov = fov.get();
+        }
+        OptSet.set(fov, Math.max(1, (int) Math.round(savedFov / f)));
     }
 
     private static double targetLn(Minecraft c) {
@@ -93,6 +132,7 @@ public final class NewZoom {
 
     /** Called by the FOV mixin with the field of view (degrees) Minecraft just worked out; returns the zoomed one. */
     public static float apply(float fov) {
+        hookCount++;
         try {
             Minecraft c = Minecraft.getInstance();
             if (c == null || c.options == null) {

@@ -15,6 +15,7 @@
     "NewItemStateMixin",
     "NewItemEntityMixin",
     "NewFogMixin",
+    "NewClockMixin",
     "HandledScreenAccessor",
     "SimpleOptionAccessor",
     "NewSetScreenMixin",

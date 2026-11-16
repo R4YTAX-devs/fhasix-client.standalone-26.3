@@ -1,8 +1,8 @@
 # FHASIX 26.3: build mod + loader, publish to the 26.3 GitHub repo, then VERIFY the upload.
-# Usage: bash release-26.3.sh v5.2.1
+# Usage: bash release-26.3.sh v5.2.2
 set -eo pipefail
 cd "$(dirname "$0")"
-V="${1:-v5.2.1}"; N="${V#v}"
+V="${1:-v5.2.2}"; N="${V#v}"
 REPO="$HOME/fhasix-client.standalone-26.3"
 URL="https://github.com/R4YTAX-devs/fhasix-client.standalone-26.3.git"
 RAW="https://raw.githubusercontent.com/R4YTAX-devs/fhasix-client.standalone-26.3/main"
@@ -31,16 +31,23 @@ rm -rf "$REPO/dist" "$REPO/loader-dist"; mkdir -p "$REPO/dist" "$REPO/loader-dis
 cp "$MOD" "$REPO/dist/fhasix-client-$V.jar"
 [ -n "$MODSRC" ] && cp "$MODSRC" "$REPO/dist/fhasix-client-$V-sources.jar"
 cp "$LDR" "$REPO/loader-dist/fhasix-loader.jar"
-jar cf "$REPO/loader-dist/fhasix-loader-sources.jar" -C loader src -C loader build.gradle -C loader settings.gradle -C loader gradle.properties 2>/dev/null || true
+LDRSRC=$(ls -t loader/build/libs/*-sources.jar 2>/dev/null | head -1 || true)
+[ -n "$LDRSRC" ] && cp "$LDRSRC" "$REPO/loader-dist/fhasix-loader-sources.jar"
 S=$(sha256sum "$REPO/dist/fhasix-client-$V.jar" | cut -d' ' -f1)
 Z=$(stat -c%s "$REPO/dist/fhasix-client-$V.jar")
 printf '{\n  "version": "%s",\n  "jar": "dist/fhasix-client-%s.jar",\n  "sha256": "%s",\n  "size": %s\n}\n' "$V" "$V" "$S" "$Z" > "$REPO/version.json"
 
-# 5) push
+# 5) copy the source jars to the phone (Downloads, visible in any file manager)
+mkdir -p /sdcard/Download
+[ -n "$MODSRC" ] && cp "$MODSRC" "/sdcard/Download/fhasix-client-$V-sources.jar"
+[ -n "$LDRSRC" ] && cp "$LDRSRC" "/sdcard/Download/fhasix-loader-$V-sources.jar"
+echo "Source jars copied to /sdcard/Download"
+
+# 6) push
 cd "$REPO" && git add -A && git commit -m "Release $V (Minecraft 26.3)" && git push -u origin main
 echo "PUSHED: $V"
 
-# 6) verify GitHub really serves the new release (the loader reads exactly these files)
+# 7) verify GitHub really serves the new release (the loader reads exactly these files)
 ok=0
 for i in 1 2 3 4 5 6 7 8; do
   RV=$(curl -fsSL "$RAW/version.json?t=$(date +%s)" 2>/dev/null | sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' || true)

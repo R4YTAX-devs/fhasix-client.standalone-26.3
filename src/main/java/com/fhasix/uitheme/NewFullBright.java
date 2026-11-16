@@ -1,10 +1,11 @@
 package com.fhasix.uitheme;
 
-import com.fhasix.uitheme.mixin.SimpleOptionAccessor;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.OptionInstance;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 
 /**
  * Full Bright: pushes the game's brightness (gamma) option past its normal maximum so caves and the
@@ -16,6 +17,7 @@ final class NewFullBright {
     static final String ID = "full_bright";
 
     private static Double original;
+    private static boolean nvAdded;
 
     private NewFullBright() {
     }
@@ -26,17 +28,7 @@ final class NewFullBright {
     }
 
     private static void set(OptionInstance<Double> opt, double v) {
-        try {
-            ((SimpleOptionAccessor<Double>) (Object) opt).fhasix$setValue(v);
-        } catch (Exception | LinkageError accessorMissing) {
-            try {
-                java.lang.reflect.Field f = net.minecraft.client.OptionInstance.class.getDeclaredField("value");
-                f.setAccessible(true);
-                f.set(opt, v);
-            } catch (Exception | LinkageError t) {
-                NewSafe.failed("full_bright", t);
-            }
-        }
+        OptSet.set(opt, v);
     }
 
     private static void tick(Minecraft c) {
@@ -55,9 +47,18 @@ final class NewFullBright {
         if (Math.abs(gamma.get() - target) > 1.0e-6) {
             set(gamma, target);
         }
+        // 26.x lights the world through a new lightmap, so also add a hidden client-side Night Vision
+        if (c.player != null && !c.player.hasEffect(MobEffects.NIGHT_VISION)) {
+            c.player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 1200, 0, false, false, false));
+            nvAdded = true;
+        }
     }
 
     private static void restore(Minecraft c) {
+        if (nvAdded && c.player != null) {
+            c.player.removeEffect(MobEffects.NIGHT_VISION);
+        }
+        nvAdded = false;
         if (original != null && c.options != null) {
             set(c.options.gamma(), original);
             original = null;

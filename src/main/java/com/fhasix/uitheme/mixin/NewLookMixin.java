@@ -20,6 +20,9 @@ public abstract class NewLookMixin {
     @Inject(method = "turn", at = @At("HEAD"), cancellable = true, require = 0)
     private void fhasix$freelook(double cursorDeltaX, double cursorDeltaY, CallbackInfo ci) {
         try {
+            if ((Object) this instanceof LocalPlayer) {
+                NewCamera.turnHookSeen = true;
+            }
             if (NewCamera.freelookActive() && (Object) this instanceof LocalPlayer) {
                 NewCamera.look(cursorDeltaX, cursorDeltaY);
                 ci.cancel();

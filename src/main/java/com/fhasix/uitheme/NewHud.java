@@ -841,7 +841,10 @@ public final class NewHud {
         HudElementRegistry.attachElementAfter(
                 VanillaHudElements.MISC_OVERLAYS,
                 Identifier.fromNamespaceAndPath("fhasixuitheme", "mod_hud"),
-                NewSafe.hud("hud_elements", (context, tickCounter) -> render(context))
+                NewSafe.hud("hud_elements", (context, tickCounter) -> {
+                    NewCamera.frameAll(Minecraft.getInstance());
+                    render(context);
+                })
         );
 
         HudElementRegistry.attachElementAfter(
