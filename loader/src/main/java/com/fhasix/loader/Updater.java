@@ -186,11 +186,12 @@ public final class Updater {
     }
 
     private void download(Path out) throws IOException {
-        IOException last = null;
+        StringBuilder why = new StringBuilder();
         for (String base : BASES) {
+          for (int attempt = 1; attempt <= 3; attempt++) {
             try {
                 progress = 0f;
-                fetchToFile(base + remoteJar, out);
+                fetchToFile(base + remoteJar + (attempt == 1 ? "" : "?retry=" + System.currentTimeMillis()), out);
                 if (remoteSize > 0 && Files.size(out) != remoteSize) {
                     throw new IOException("size mismatch");
                 }
@@ -199,11 +200,15 @@ public final class Updater {
                 }
                 return;
             } catch (IOException e) {
-                last = e;
+                // keep every mirror's answer, so a failure says which host refused and why
+                String host = base.replaceAll("^https?://([^/]+)/.*$", "$1");
+                why.append(why.length() == 0 ? "" : "; ").append(host).append(" try ").append(attempt).append(": ").append(e.getMessage());
                 try { Files.deleteIfExists(out); } catch (IOException ignored) { }
+                try { Thread.sleep(1500L * attempt); } catch (InterruptedException ie) { Thread.currentThread().interrupt(); }
             }
+          }
         }
-        throw new IOException("download failed" + (last != null ? " (" + last.getMessage() + ")" : ""));
+        throw new IOException("download failed (" + why + ")");
     }
 
     private void scheduleWindowsSwap(Path staged, Path target, List<Path> stuck) throws IOException {
@@ -262,8 +267,10 @@ public final class Updater {
         HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
         con.setConnectTimeout(5000);
         con.setReadTimeout(readMs);
-        con.setRequestProperty("User-Agent", "FhasixLoader/1.0");
+        con.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 14) FhasixLoader/1.0");
+        con.setRequestProperty("Accept", "*/*");
         con.setRequestProperty("Cache-Control", "no-cache");
+        con.setInstanceFollowRedirects(true);
         int code = con.getResponseCode();
         if (code != 200) throw new IOException("HTTP " + code);
         return con;

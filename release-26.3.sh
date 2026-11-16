@@ -2,7 +2,7 @@
 # Usage: bash release-26.3.sh v5.2.2
 set -eo pipefail
 cd "$(dirname "$0")"
-V="${1:-v5.2.3}"; N="${V#v}"
+V="${1:-v5.2.5}"; N="${V#v}"
 REPO="$HOME/fhasix-client.standalone-26.3"
 URL="https://github.com/R4YTAX-devs/fhasix-client.standalone-26.3.git"
 RAW="https://raw.githubusercontent.com/R4YTAX-devs/fhasix-client.standalone-26.3/main"
@@ -32,7 +32,6 @@ cd - >/dev/null
 tar --exclude=.git --exclude=build --exclude=.gradle --exclude=dist --exclude=loader-dist --exclude='*.log' -cf - . | tar -xf - -C "$REPO"
 rm -rf "$REPO/dist" "$REPO/loader-dist"; mkdir -p "$REPO/dist" "$REPO/loader-dist"
 cp "$MOD" "$REPO/dist/fhasix-client-$V.jar"
-[ -n "$MODSRC" ] && cp "$MODSRC" "$REPO/dist/fhasix-client-$V-sources.jar"
 cp "$LDR" "$REPO/loader-dist/fhasix-loader.jar"
 LDRSRC=$(ls -t loader/build/libs/*-sources.jar 2>/dev/null | head -1 || true)
 [ -n "$LDRSRC" ] && cp "$LDRSRC" "$REPO/loader-dist/fhasix-loader-sources.jar"
@@ -42,7 +41,6 @@ printf '{\n  "version": "%s",\n  "jar": "dist/fhasix-client-%s.jar",\n  "sha256"
 
 # 5) copy the source jars to the phone (Downloads, visible in any file manager)
 mkdir -p /sdcard/Download
-[ -n "$MODSRC" ] && cp "$MODSRC" "/sdcard/Download/fhasix-client-$V-sources.jar"
 [ -n "$LDRSRC" ] && cp "$LDRSRC" "/sdcard/Download/fhasix-loader-$V-sources.jar"
 echo "Source jars copied to /sdcard/Download"
 
@@ -68,5 +66,5 @@ if [ "$ok" = 1 ]; then
 else
   echo "WARNING: could not confirm on GitHub. Is the repo public? Check: $RAW/version.json"
 fi
-echo "Files on GitHub: dist/fhasix-client-$V.jar  dist/fhasix-client-$V-sources.jar  loader-dist/fhasix-loader.jar  loader-dist/fhasix-loader-sources.jar"
+echo "Files on GitHub: dist/fhasix-client-$V.jar  loader-dist/fhasix-loader.jar  loader-dist/fhasix-loader-sources.jar"
 echo "Also: /sdcard/Download/fhasix-api.txt lists the real Minecraft names (send it to Claude for fog / block overlay)."
