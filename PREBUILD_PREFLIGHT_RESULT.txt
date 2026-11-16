@@ -1,0 +1,7 @@
+FHASIX source preflight report
+Java files scanned: 73
+JSON resources scanned: 4
+Checks: package/path consistency, Java brace/comment/string structure, project-internal imports, JSON syntax, mixin source references, version properties.
+Limit: this is not a Java compiler and cannot verify Minecraft/Fabric method signatures. Gradle/javac must still pass.
+
+PASS: all structural preflight checks passed.

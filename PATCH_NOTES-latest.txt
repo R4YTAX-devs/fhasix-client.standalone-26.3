@@ -1,0 +1,3 @@
+FHASIX Minecraft Java 1.21.11 / Fabric
+
+This local ZIP includes a Gradle bootstrap script and Java compiler diagnostics. It has not been compiled successfully in this environment. Run ./gradlew build --continue --stacktrace --no-daemon with Java 21 and network access to verify.

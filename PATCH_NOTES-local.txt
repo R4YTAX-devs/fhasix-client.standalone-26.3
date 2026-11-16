@@ -1,0 +1,7 @@
+FHASIX Minecraft Java 1.21.11 / Fabric - local build package
+
+- Removed .github/ workflows and GitHub-only build instructions.
+- Added ./gradlew and gradlew.bat bootstrap scripts that download official Gradle 9.2.1 and verify the published SHA-256 checksum.
+- Added LOCAL_BUILD.md with local Android Termux/Linux/macOS/Windows instructions.
+- Kept Java compiler diagnostics (-Xmaxerrs 1000, -Xdiags:verbose) and Gradle build configuration.
+- This is not a verified successful compile; the build must be run in an environment with Java 21 and network access to Gradle/Minecraft/Fabric dependency repositories.

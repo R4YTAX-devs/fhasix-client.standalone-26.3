@@ -1,0 +1,7 @@
+FHASIX Minecraft Java 1.21.11 / Fabric - source audit notes
+
+- Static preflight checks cover Java package/path consistency, brace/comment/string structure, internal imports, JSON syntax, mixin source references, and required version properties.
+- The local preflight script is now located at tools/preflight.py and can be run with ./preflight.sh.
+- Java compiler diagnostics use -Xmaxerrs 1000 and -Xdiags:verbose.
+- Gradle build uses the configured Java 21 target and can be run locally with ./gradlew build --continue --stacktrace --no-daemon.
+- This source has not been verified by a successful complete Gradle build.

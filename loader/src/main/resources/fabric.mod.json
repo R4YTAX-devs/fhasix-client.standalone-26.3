@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "fhasixloader",
+  "version": "${version}",
+  "name": "FHASIX Loader",
+  "description": "Downloads and keeps FHASIX Client up to date.",
+  "authors": ["RAYTAXMC"],
+  "contact": {},
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["com.fhasix.loader.FhasixLoader"]
+  },
+  "mixins": ["fhasixloader.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.20.1",
+    "minecraft": ">=26.3",
+    "java": ">=25"
+  }
+}
