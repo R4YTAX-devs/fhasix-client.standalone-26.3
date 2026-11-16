@@ -16,14 +16,34 @@ import org.spongepowered.asm.mixin.injection.At;
 public abstract class NewCameraMixin {
 
     /** Freelook: while active the camera uses its own yaw/pitch instead of the player's. */
-    @WrapOperation(method = "setup",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;setRotation(FF)V"),
+    @WrapOperation(method = "alignWithEntity",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;setRotation(FF)V", ordinal = 0),
+            require = 0)
+    private void fhasix$rotationCart(Camera self, float yaw, float pitch, Operation<Void> original) {
+        fhasix$apply(self, yaw, pitch, false, original);
+    }
+
+    /** Ordinary first / third person (behind) view. */
+    @WrapOperation(method = "alignWithEntity",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;setRotation(FF)V", ordinal = 1),
             require = 0)
     private void fhasix$rotation(Camera self, float yaw, float pitch, Operation<Void> original) {
+        fhasix$apply(self, yaw, pitch, false, original);
+    }
+
+    /** Third person (front) view looks back at the player, so yaw is turned 180 and pitch flipped. */
+    @WrapOperation(method = "alignWithEntity",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;setRotation(FF)V", ordinal = 2),
+            require = 0)
+    private void fhasix$rotationFront(Camera self, float yaw, float pitch, Operation<Void> original) {
+        fhasix$apply(self, yaw, pitch, true, original);
+    }
+
+    private static void fhasix$apply(Camera self, float yaw, float pitch, boolean mirrored, Operation<Void> original) {
         try {
             if (NewCamera.freelookActive()) {
-                yaw = NewCamera.yaw();
-                pitch = NewCamera.pitch();
+                yaw = mirrored ? NewCamera.yaw() + 180f : NewCamera.yaw();
+                pitch = mirrored ? -NewCamera.pitch() : NewCamera.pitch();
             }
         } catch (Exception | LinkageError t) {
             com.fhasix.uitheme.NewSafe.failed("camera_mixin", t);
@@ -32,7 +52,7 @@ public abstract class NewCameraMixin {
     }
 
     /** Third-person distance. */
-    @WrapOperation(method = "setup",
+    @WrapOperation(method = "alignWithEntity",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;getMaxZoom(F)F"),
             require = 0)
     private float fhasix$distance(Camera self, float distance, Operation<Float> original) {
@@ -46,7 +66,7 @@ public abstract class NewCameraMixin {
     }
 
     /** Shoulder + height offset (only for the third-person "move backwards" call, whose first argument is negative). */
-    @WrapOperation(method = "setup",
+    @WrapOperation(method = "alignWithEntity",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;move(FFF)V"),
             require = 0)
     private void fhasix$offset(Camera self, float x, float y, float z, Operation<Void> original) {

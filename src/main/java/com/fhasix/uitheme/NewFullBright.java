@@ -26,7 +26,17 @@ final class NewFullBright {
     }
 
     private static void set(OptionInstance<Double> opt, double v) {
-        ((SimpleOptionAccessor<Double>) (Object) opt).fhasix$setValue(v);
+        try {
+            ((SimpleOptionAccessor<Double>) (Object) opt).fhasix$setValue(v);
+        } catch (Exception | LinkageError accessorMissing) {
+            try {
+                java.lang.reflect.Field f = net.minecraft.client.OptionInstance.class.getDeclaredField("value");
+                f.setAccessible(true);
+                f.set(opt, v);
+            } catch (Exception | LinkageError t) {
+                NewSafe.failed("full_bright", t);
+            }
+        }
     }
 
     private static void tick(Minecraft c) {
