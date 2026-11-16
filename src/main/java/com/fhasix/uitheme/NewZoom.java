@@ -58,7 +58,14 @@ public final class NewZoom {
         }
         boolean hookAlive = hookCount != seenHook;
         seenHook = hookCount;
-        if (hookAlive || c.player == null || !NewModSettings.isEnabled(c, ID)) {
+        if (hookAlive || c.player == null) {
+            restoreFov(c);
+            return;
+        }
+        if (!held && cur < 0.0005 && savedFov == null) {
+            return; // idle: nothing to animate, so no work at all
+        }
+        if (!NewModSettings.isEnabled(c, ID)) {
             restoreFov(c);
             return;
         }

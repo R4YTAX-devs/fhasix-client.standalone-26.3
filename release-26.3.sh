@@ -2,11 +2,14 @@
 # Usage: bash release-26.3.sh v5.2.2
 set -eo pipefail
 cd "$(dirname "$0")"
-V="${1:-v5.2.2}"; N="${V#v}"
+V="${1:-v5.2.3}"; N="${V#v}"
 REPO="$HOME/fhasix-client.standalone-26.3"
 URL="https://github.com/R4YTAX-devs/fhasix-client.standalone-26.3.git"
 RAW="https://raw.githubusercontent.com/R4YTAX-devs/fhasix-client.standalone-26.3/main"
 export JAVA_HOME="${JAVA_HOME:-$PREFIX/lib/jvm/java-25-openjdk}"
+
+# 0) read the real class names out of the Minecraft jar (fixes the Time Changer hook, writes fhasix-api.txt)
+bash ./resolve-api.sh || true
 
 # 1) compile the mod (also produces the -sources.jar)
 sed -i "s/^mod_version=.*/mod_version=$N.0.0/" gradle.properties
@@ -66,3 +69,4 @@ else
   echo "WARNING: could not confirm on GitHub. Is the repo public? Check: $RAW/version.json"
 fi
 echo "Files on GitHub: dist/fhasix-client-$V.jar  dist/fhasix-client-$V-sources.jar  loader-dist/fhasix-loader.jar  loader-dist/fhasix-loader-sources.jar"
+echo "Also: /sdcard/Download/fhasix-api.txt lists the real Minecraft names (send it to Claude for fog / block overlay)."
