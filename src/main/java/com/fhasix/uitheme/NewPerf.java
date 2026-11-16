@@ -109,7 +109,7 @@ public final class NewPerf {
                     "Turns off the heaviest extras this Minecraft version has: improved transparency, fancy leaves, chunk fade-in and long-range weather. Most FPS."}
     };
     /** Which tab of the Performance screen a mode is on: 1 = World, 2 = Video, 3 = System. */
-    static final int[] TAB = {1, 1, 0, 1, 1, 1, 2, 3, 0, 0, 0, 2, 0, 0, 3};
+    static final int[] TAB = {1, 1, 0, 1, 1, 1, 2, 3, 0, 0, 0, 2, 0, 0, 0};
     static final int[] ICON = {37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 49, 44};
     static final boolean[] NEWBADGE = {false, false, false, false, false, false, false, false, false, false, false, false, false, false, true};
 
@@ -190,6 +190,9 @@ public final class NewPerf {
     static boolean on(Minecraft c, int mode) {
         if (HIDDEN[mode]) {
             return false;
+        }
+        if (mode == BOOST) {
+            return true; // Extra Boost is always on; it has no switch
         }
         return NewModSettings.optBool(c, MOD, IDS[mode] + ".on");
     }

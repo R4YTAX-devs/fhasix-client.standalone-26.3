@@ -2,7 +2,7 @@
 # Usage: bash release-26.3.sh v5.2.2
 set -eo pipefail
 cd "$(dirname "$0")"
-V="${1:-v5.2.5}"; N="${V#v}"
+V="${1:-5.3}"; N="${V#v}"
 REPO="$HOME/fhasix-client.standalone-26.3"
 URL="https://github.com/R4YTAX-devs/fhasix-client.standalone-26.3.git"
 RAW="https://raw.githubusercontent.com/R4YTAX-devs/fhasix-client.standalone-26.3/main"
