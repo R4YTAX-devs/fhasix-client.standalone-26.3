@@ -3,6 +3,7 @@ package com.fhasix.uitheme;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.minecraft.resources.Identifier;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -11,15 +12,20 @@ import net.minecraft.network.chat.Component;
 /**
  * Title-screen side banners (bottom-right): a "check in" card while today's Fhasix Points are still unclaimed
  * (stacked on top), and a news card below it. Hovering zooms the card's content inside its box; clicking opens the Store.
- * Drawn only with fill()/NewUi/NewFont, so there are no textures to ship.
+ * The points card uses the main button look (NewButtonArt.navy) and the Store points gem; the news card is drawn in code.
  */
 public class NewBanner extends Button {
     public static final int POINTS = 0;
     public static final int NEWS = 1;
 
     /** News card text. Edit these two lines for each update. */
-    private static final String NEWS_TITLE = "Update 5.4";
-    private static final String NEWS_LINE = "More FPS - new banners";
+    private static final String NEWS_TITLE = "Update 5.5";
+    private static final String NEWS_LINE = "New points banner";
+
+    /** The same points gem the Store and Cosmetics use. */
+    private static final Identifier GEM = Identifier.fromNamespaceAndPath("fhasixuitheme", "textures/gui/store/store_gem.png");
+    private static final int GEM_TEX = 128;
+    private static final int GREEN = NewUi.rgb(62, 200, 82);
 
     private final int kind;
     private float zoomT = 0f;
@@ -35,7 +41,8 @@ public class NewBanner extends Button {
         List<NewBanner> out = new ArrayList<>();
         float s = NewUi.scale(sw, sh);
         int w = Math.max(60, Math.round(400 * s));
-        int ph = Math.max(18, Math.round(95 * s));
+        int pw = Math.max(50, Math.round(330 * s));
+        int ph = Math.max(16, Math.round(66 * s));
         int nh = Math.max(34, Math.round(215 * s));
         int gap = Math.max(2, Math.round(14 * s));
         int margin = Math.max(4, Math.round(26 * s));
@@ -49,7 +56,7 @@ public class NewBanner extends Button {
             canClaim = false;
         }
         if (canClaim) {
-            out.add(new NewBanner(x, newsY - gap - ph, w, ph, POINTS, open));
+            out.add(new NewBanner(x + (w - pw), newsY - gap - ph, pw, ph, POINTS, open));
         }
         return out;
     }
@@ -92,32 +99,30 @@ public class NewBanner extends Button {
     }
 
     private void drawPoints(GuiGraphicsExtractor c, int x, int y, int w, int h) {
-        float k = Math.max(0.2f, w / 400f);          // design pixels -> screen
-        float z = 1f + 0.10f * zoomT;                 // content zoom on hover (the card itself stays put)
-        int rad = Math.max(3, Math.round(h * 0.14f));
-        NewUi.frame(c, x, y, w, h, rad, NewUi.CARD_BORDER, NewUi.CARD_T, NewUi.CARD_B);
+        float z = 1f + 0.08f * zoomT;                 // content zoom on hover (the card itself stays put)
+        // same look as the Singleplayer / Multiplayer / Cosmetics buttons
+        NewButtonArt.navy(c, x, y, w, h, zoomT);
 
-        // gem
-        int cx = x + Math.round(h * 0.52f);
-        int cy = y + h / 2;
-        int half = Math.max(3, Math.round(h * 0.27f * z));
-        diamond(c, cx, cy, half, 0xFFC96A12);
-        diamond(c, cx, cy, Math.max(2, Math.round(half * 0.78f)), 0xFFEE8F25);
-        diamond(c, cx, cy, Math.max(1, Math.round(half * 0.42f)), 0xFFFFD27A);
         int reward;
         try {
             reward = FhasixPoints.nextReward();
         } catch (Exception | LinkageError t) {
             reward = 5;
         }
-        float small = 13f * k * z;
-        ui(c, "+" + reward, cx + half - Math.round(h * 0.02f), y + Math.round(h * 0.06f), 0xFFE8892B, NewFont.W_BOLD, 11f * k);
+
+        // the Fhasix points gem (same texture as the Store)
+        int gs = Math.max(8, Math.round(h * 0.60f));
+        int gx = x + Math.round(h * 0.22f);
+        int gy = y + (h - gs) / 2;
+        int gz = Math.max(8, Math.round(gs * z));
+        NewUi.tex(c, GEM, gx + (gs - gz) / 2, gy + (gs - gz) / 2, gz, GEM_TEX);
+        ui(c, "+" + reward, gx + gs - Math.round(h * 0.04f), y + Math.round(h * 0.07f), GREEN, NewFont.W_BOLD, h * 0.15f);
 
         // text
-        int tx = x + Math.round(h * 1.05f);
-        float lineSize = 15f * k * z;
-        int ly1 = y + Math.round(h * 0.26f);
-        int ly2 = y + Math.round(h * 0.55f);
+        float lineSize = h * 0.20f * z;
+        int tx = gx + gs + Math.round(h * 0.34f);
+        int ly1 = y + Math.round((h - lineSize * 2.45f) / 2f);
+        int ly2 = ly1 + Math.round(lineSize * 1.45f);
         ui(c, "Check in now", tx, ly1, 0xFFB9BBC2, NewFont.W_MED, lineSize);
         int cur = tx;
         ui(c, "for ", cur, ly2, 0xFFB9BBC2, NewFont.W_MED, lineSize);
