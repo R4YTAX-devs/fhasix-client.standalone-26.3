@@ -67,7 +67,7 @@ public final class NewModSettings {
             new ModDef("no_crash", "No Crash", 0, true, true, 10),
             new ModDef("no_boss_bar", "No Boss Bar", TAG_HUD, true, true, 13),
             new ModDef("custom_crosshair", "Custom Crosshair", TAG_HUD | TAG_PVP, true, true, 18),
-            new ModDef("custom_fog", "Custom Fog", 0, true, true, 19),
+            new ModDef("custom_fog", "Custom Fog", 0, true, false, 19), // disabled for now: fog colour does not change yet
             new ModDef("damage_indicator", "Health Indicator", TAG_PVP, true, true, 20),
             new ModDef("direction", "Direction", TAG_HUD, true, true, 21),
             new ModDef("coordinates", "Coordinates", TAG_HUD, true, true, 23),

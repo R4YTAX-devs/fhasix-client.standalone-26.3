@@ -196,6 +196,16 @@ public abstract class f6 extends Screen {
                 press -> this.minecraft.stop()
         ));
 
+        // Side banners (bottom-right): Fhasix Points check-in (only while unclaimed) + news. Click opens the Store.
+        try {
+            for (com.fhasix.uitheme.NewBanner banner : com.fhasix.uitheme.NewBanner.create(this.width, this.height,
+                    press -> this.minecraft.gui.setScreen(new StoreScreen(self)))) {
+                this.addRenderableWidget(banner);
+            }
+        } catch (Exception | LinkageError t) {
+            com.fhasix.uitheme.NewSafe.failed("banners", t);
+        }
+
         // Top-right icon row - same theme, square, sized/spaced off the reference.
         // Button size matches the main buttons' height (unchanged from v4) - only the
         // icon *glyph* drawn inside is smaller now (see c3's padding), and the
