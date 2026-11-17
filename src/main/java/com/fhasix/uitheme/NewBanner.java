@@ -19,8 +19,8 @@ public class NewBanner extends Button {
     public static final int NEWS = 1;
 
     /** News card text. Edit these two lines for each update. */
-    private static final String NEWS_TITLE = "Update 5.5";
-    private static final String NEWS_LINE = "New points banner";
+    private static final String NEWS_TITLE = "Update 5.5.1";
+    private static final String NEWS_LINE = "Bigger points banner";
 
     /** The same points gem the Store and Cosmetics use. */
     private static final Identifier GEM = Identifier.fromNamespaceAndPath("fhasixuitheme", "textures/gui/store/store_gem.png");
@@ -41,8 +41,8 @@ public class NewBanner extends Button {
         List<NewBanner> out = new ArrayList<>();
         float s = NewUi.scale(sw, sh);
         int w = Math.max(60, Math.round(400 * s));
-        int pw = Math.max(50, Math.round(330 * s));
-        int ph = Math.max(16, Math.round(66 * s));
+        int pw = w;                                   // same width as the news card
+        int ph = Math.max(18, Math.round(84 * s));
         int nh = Math.max(34, Math.round(215 * s));
         int gap = Math.max(2, Math.round(14 * s));
         int margin = Math.max(4, Math.round(26 * s));
@@ -111,15 +111,15 @@ public class NewBanner extends Button {
         }
 
         // the Fhasix points gem (same texture as the Store)
-        int gs = Math.max(8, Math.round(h * 0.60f));
+        int gs = Math.max(8, Math.round(h * 0.62f));
         int gx = x + Math.round(h * 0.22f);
         int gy = y + (h - gs) / 2;
         int gz = Math.max(8, Math.round(gs * z));
         NewUi.tex(c, GEM, gx + (gs - gz) / 2, gy + (gs - gz) / 2, gz, GEM_TEX);
-        ui(c, "+" + reward, gx + gs - Math.round(h * 0.04f), y + Math.round(h * 0.07f), GREEN, NewFont.W_BOLD, h * 0.15f);
+        ui(c, "+" + reward, gx + gs - Math.round(h * 0.04f), y + Math.round(h * 0.07f), GREEN, NewFont.W_BOLD, h * 0.16f);
 
         // text
-        float lineSize = h * 0.20f * z;
+        float lineSize = h * 0.23f * z;
         int tx = gx + gs + Math.round(h * 0.34f);
         int ly1 = y + Math.round((h - lineSize * 2.45f) / 2f);
         int ly2 = ly1 + Math.round(lineSize * 1.45f);

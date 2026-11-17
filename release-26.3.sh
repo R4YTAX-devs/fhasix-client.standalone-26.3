@@ -1,8 +1,8 @@
 # FHASIX Minecraft 26.3: build mod + loader, publish to the GitHub repo, then VERIFY the upload.
-# Usage: bash release-26.3.sh 5.5        (Termux; everything else is set up automatically)
+# Usage: bash release-26.3.sh 5.5.1        (Termux; everything else is set up automatically)
 set -eo pipefail
 cd "$(dirname "$0")"
-V="${1:-5.5}"; V="${V#v}"; N="$V"
+V="${1:-5.5.1}"; V="${V#v}"; N="$V"
 JV=25
 REPO="$HOME/fhasix-client.standalone-26.3"
 URL="https://github.com/R4YTAX-devs/fhasix-client.standalone-26.3.git"
@@ -23,7 +23,8 @@ chmod +x gradlew
 bash ./resolve-api.sh || true
 
 # 1) compile the mod
-sed -i "s/^mod_version=.*/mod_version=$N.0.0/" gradle.properties
+MV="$N.0.0"; [ "$(echo "$N" | tr -cd . | wc -c)" -ge 2 ] && MV="$N.0"
+sed -i "s/^mod_version=.*/mod_version=$MV/" gradle.properties
 ./gradlew build --no-daemon 2>&1 | tee build-output.log
 MOD=$(ls -t build/libs/*.jar | grep -v -e '-sources' -e '-dev' | head -1)
 
