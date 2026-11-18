@@ -95,9 +95,9 @@ public final class NewPerf {
             {"Lowers the priority of loading and download threads a little.",
                     "Lowers background loading threads a lot so the game thread comes first.",
                     "Background loading gets the lowest priority there is. Most FPS."},
-            {"Texture mipmap level 2.",
-                    "Texture mipmap level 1.",
-                    "No mipmaps: the cheapest textures. Textures reload once when you change this. Most FPS."},
+            {"Mipmap 4: smooth, steady textures far away (no flicker or shimmer).",
+                    "Mipmap 3: no flicker far away and a little sharper. Textures reload once when you change this.",
+                    "Mipmap 3: no flicker far away, sharper distance. Textures reload once when you change this."},
             {"Caps the frame rate at 60 while a menu is open, so menus use less power.",
                     "Caps the frame rate at 30 while a menu is open.",
                     "Caps the frame rate at 15 while a menu is open. Gameplay FPS is not touched."},
@@ -268,6 +268,7 @@ public final class NewPerf {
     private static Integer menuPrev;
     private static int tickCount = 0;
     private static boolean menuMigrated = false;
+    private static boolean turboMigrated = false;
 
     static void tick(Minecraft c) {
         if (c == null || c.options == null) {
@@ -280,6 +281,24 @@ public final class NewPerf {
                 if (NewModSettings.opt(c, MOD, "menu_off_v1") == 0) {
                     NewModSettings.setOpt(c, MOD, IDS[MENU] + ".on", 0);
                     NewModSettings.setOpt(c, MOD, "menu_off_v1", 1);
+                    NewModSettings.save(c);
+                }
+            });
+        }
+        if (!turboMigrated && setupDone(c)) {
+            turboMigrated = true;
+            NewSafe.run("perf_turbo_migrate", () -> {
+                // one-time (update 5.6): unlimited FPS, smooth far textures, fewer particles, Extra Boost on
+                if (NewModSettings.opt(c, MOD, "turbo_v2") == 0) {
+                    NewModSettings.setOpt(c, MOD, IDS[FRAME] + ".on", 1);
+                    NewModSettings.setOpt(c, MOD, IDS[FRAME] + ".lvl", 2);
+                    NewModSettings.setOpt(c, MOD, IDS[TEXTURE] + ".on", 1);
+                    NewModSettings.setOpt(c, MOD, IDS[TEXTURE] + ".lvl", 1);
+                    NewModSettings.setOpt(c, MOD, IDS[PARTICLES] + ".on", 1);
+                    NewModSettings.setOpt(c, MOD, IDS[PARTICLES] + ".lvl",
+                            Math.max(1, NewModSettings.opt(c, MOD, IDS[PARTICLES] + ".lvl")));
+                    NewModSettings.setOpt(c, MOD, IDS[BOOST] + ".on", 1);
+                    NewModSettings.setOpt(c, MOD, "turbo_v2", 1);
                     NewModSettings.save(c);
                 }
             });
@@ -389,7 +408,7 @@ public final class NewPerf {
                         origMaxFps = o.framerateLimit().get();
                     }
                     o.enableVsync().set(Boolean.FALSE);
-                    if (lvl >= 1) {
+                    if (lvl >= 0) {
                         o.framerateLimit().set(260); // 260 = unlimited
                         if (menuPrev != null) {
                             menuPrev = 260;
@@ -441,10 +460,12 @@ public final class NewPerf {
                     if (origMip == null) {
                         origMip = o.mipmapLevels().get();
                     }
-                    o.mipmapLevels().set(new int[]{2, 1, 0}[lvl]);
+                    o.mipmapLevels().set(new int[]{4, 3, 3}[lvl]);
+                    PerfBoost.clarity(c, true);
                 } else if (origMip != null) {
                     o.mipmapLevels().set(origMip);
                     origMip = null;
+                    PerfBoost.clarity(c, false);
                 }
                 break;
             default:
@@ -533,7 +554,7 @@ public final class NewPerf {
             boolean enable;
             int lvl;
             if (device == DEVICE_HIGH) {
-                enable = m <= LAZY; // particles, culling, lazy chunks - small
+                enable = m <= LAZY || m == FRAME || m == TEXTURE; // small + unlimited FPS + smooth far textures
                 lvl = 0;
             } else if (device == DEVICE_MEDIUM) {
                 enable = m != MENU; // Menu FPS Saver stays OFF by default - it made the menus laggy
@@ -683,15 +704,15 @@ public final class NewPerf {
             return item ? d > 24 * 24 : (!(e instanceof Player) && d > 48 * 48);
         }
         if (e instanceof ArmorStand) {
-            return d > 12 * 12;
+            return d > 8 * 8;
         }
         if (e instanceof HangingEntity) {
-            return d > 16 * 16;
-        }
-        if (item) {
             return d > 12 * 12;
         }
-        return e instanceof Player ? d > 48 * 48 : d > 24 * 24;
+        if (item) {
+            return d > 8 * 8;
+        }
+        return e instanceof Player ? d > 48 * 48 : d > 20 * 20;
     }
 
     // ------------------------------------------------------------------ lazy chunk loading

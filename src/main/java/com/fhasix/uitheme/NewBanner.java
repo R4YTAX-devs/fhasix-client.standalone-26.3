@@ -19,8 +19,8 @@ public class NewBanner extends Button {
     public static final int NEWS = 1;
 
     /** News card text. Edit these two lines for each update. */
-    private static final String NEWS_TITLE = "Update 5.5.1";
-    private static final String NEWS_LINE = "Bigger points banner";
+    private static final String NEWS_TITLE = "Performance Update 2";
+    private static final String NEWS_LINE = "Higher FPS - smooth far textures";
 
     /** The same points gem the Store and Cosmetics use. */
     private static final Identifier GEM = Identifier.fromNamespaceAndPath("fhasixuitheme", "textures/gui/store/store_gem.png");
@@ -154,6 +154,10 @@ public class NewBanner extends Button {
         // title (soft shadow first)
         float tsz = 30f * k * z;
         int tw = uw(NEWS_TITLE, NewFont.W_BOLD, tsz);
+        if (tw > w * 0.90f) {                         // long title: shrink to fit the card
+            tsz *= (w * 0.90f) / tw;
+            tw = uw(NEWS_TITLE, NewFont.W_BOLD, tsz);
+        }
         int tx = x + (w - tw) / 2;
         int ty = y + Math.round(h * 0.20f);
         ui(c, NEWS_TITLE, tx + 1, ty + 1, 0x55000000, NewFont.W_BOLD, tsz);

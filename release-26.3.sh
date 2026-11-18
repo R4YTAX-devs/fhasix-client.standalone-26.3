@@ -1,8 +1,8 @@
 # FHASIX Minecraft 26.3: build mod + loader, publish to the GitHub repo, then VERIFY the upload.
-# Usage: bash release-26.3.sh 5.5.1        (Termux; everything else is set up automatically)
+# Usage: bash release-26.3.sh 5.6        (Termux; everything else is set up automatically)
 set -eo pipefail
 cd "$(dirname "$0")"
-V="${1:-5.5.1}"; V="${V#v}"; N="$V"
+V="${1:-5.6}"; V="${V#v}"; N="$V"
 JV=25
 REPO="$HOME/fhasix-client.standalone-26.3"
 URL="https://github.com/R4YTAX-devs/fhasix-client.standalone-26.3.git"
