@@ -90,6 +90,39 @@ final class NewProjection {
         return new int[]{Math.round((float) (sw / 2.0 * (1.0 + nx))), Math.round((float) (sh / 2.0 * (1.0 - ny)))};
     }
 
+    /** Distance in front of the camera (negative = behind it). */
+    double depth(double x, double y, double z) {
+        return (x - ex) * fx + (y - ey) * fy + (z - ez) * fz;
+    }
+
+    /** Like project(), but without the near / off-screen checks (the caller clips against the near plane itself). */
+    int[] projectLoose(double x, double y, double z) {
+        double dx = x - ex;
+        double dy = y - ey;
+        double dz = z - ez;
+        double depth = dx * fx + dy * fy + dz * fz;
+        if (depth < 0.001) {
+            return null;
+        }
+        double nx = (dx * rx + dz * rz) / (depth * tanHalf * aspect);
+        double ny = (dx * ux + dy * uy + dz * uz) / (depth * tanHalf);
+        nx = Math.max(-50.0, Math.min(50.0, nx));
+        ny = Math.max(-50.0, Math.min(50.0, ny));
+        return new int[]{Math.round((float) (sw / 2.0 * (1.0 + nx))), Math.round((float) (sh / 2.0 * (1.0 - ny)))};
+    }
+
+    double eyeX() {
+        return ex;
+    }
+
+    double eyeY() {
+        return ey;
+    }
+
+    double eyeZ() {
+        return ez;
+    }
+
     double distanceSq(double x, double y, double z) {
         double dx = x - ex;
         double dy = y - ey;

@@ -856,6 +856,7 @@ public final class NewHud {
         NewBlockOverlay.init();
         NewCamera.init(category);
         NewZoom.init(category);
+        NewExtras.init(category);
         NewAutohide.init();
         NewOreHighlight.init();
         NewNoBossBar.init();

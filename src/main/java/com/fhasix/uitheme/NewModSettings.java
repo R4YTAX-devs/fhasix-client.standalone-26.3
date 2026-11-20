@@ -88,8 +88,15 @@ public final class NewModSettings {
             new ModDef("playtime", "Playtime", TAG_HUD, true, true, 53),
             new ModDef("ping", "Ping", TAG_HUD | TAG_PVP, true, true, 54),
             new ModDef("pack_display", "Pack Display", TAG_HUD, true, true, 55),
+            new ModDef("hit_color", "Hit Color", TAG_PVP, true, true, 57),
+            new ModDef("no_hurt_cam", "No Hurt Cam", TAG_PVP, true, true, 58),
+            new ModDef("low_fire", "Low Fire", TAG_PVP, true, true, 59),
+            new ModDef("motion_blur", "Motion Blur", TAG_PVP, true, true, 60),
+            new ModDef("waypoints", "Waypoints", TAG_HUD, true, true, 61),
+            new ModDef("minimap", "Minimap", TAG_HUD, true, true, 62),
+            new ModDef("discord_rpc", "Discord Rich Presence", 0, true, true, 63),
             new ModDef("dark_mode", "Dark Mode", 0, true, true, 22),
-            new ModDef("auto_text", "Auto Text", TAG_HYPIXEL, false, false, 11)
+            new ModDef("auto_text", "Auto Text", TAG_HYPIXEL, true, true, 11)
     );
 
     public static ModDef find(String id) {

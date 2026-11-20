@@ -153,7 +153,47 @@ final class NewModOptions {
         bo.add(slider("balpha", "Border opacity", 90, 10, 100, 5, "%"));
         bo.add(color("fcolor", "Overlay color", 1));
         bo.add(slider("falpha", "Overlay opacity", 25, 5, 80, 5, "%"));
+        bo.add(slider("thick", "Border thickness", 2, 1, 4, 1, " px"));
         BY_MOD.put("block_overlay", bo);
+
+        List<Opt> hc = new ArrayList<>();
+        hc.add(picker("rgb", "Hit color", 0xFF0000));
+        hc.add(slider("alpha", "Strength", 70, 20, 100, 5, "%"));
+        BY_MOD.put("hit_color", hc);
+
+        List<Opt> lf = new ArrayList<>();
+        lf.add(slider("drop", "Move fire down", 30, 5, 60, 5, "%"));
+        BY_MOD.put("low_fire", lf);
+
+        List<Opt> mb = new ArrayList<>();
+        mb.add(slider("strength", "Blur strength", 55, 10, 90, 5, "%"));
+        BY_MOD.put("motion_blur", mb);
+
+        List<Opt> wpo = new ArrayList<>();
+        wpo.add(toggle("markers", "Show markers in the world", true));
+        wpo.add(slider("range", "Marker distance", 1500, 100, 10000, 100, " m"));
+        BY_MOD.put("waypoints", wpo);
+
+        List<Opt> mm = new ArrayList<>();
+        mm.add(choice("pos", "Position", 1, "Top left", "Top right", "Bottom left", "Bottom right", "Left middle", "Right middle"));
+        mm.add(slider("size", "Size", 100, 64, 180, 4, " px"));
+        mm.add(slider("zoom", "Blocks per square", 2, 1, 4, 1, ""));
+        mm.add(choice("detail", "Detail", 0, "Low (fastest)", "Medium", "High"));
+        mm.add(toggle("waypoints", "Show waypoints", true));
+        mm.add(toggle("players", "Show other players", true));
+        BY_MOD.put("minimap", mm);
+
+        List<Opt> dr = new ArrayList<>();
+        dr.add(toggle("server", "Show the server address", false));
+        BY_MOD.put("discord_rpc", dr);
+
+        List<Opt> at = new ArrayList<>();
+        at.add(toggle("gg", "Say GG when a game ends", true));
+        at.add(choice("ggtext", "GG message", 0, "gg", "GG", "gg wp", "good game"));
+        at.add(toggle("start", "Say good luck when a game starts", false));
+        at.add(choice("gltext", "Good luck message", 0, "gl hf", "good luck", "glhf"));
+        at.add(slider("delay", "Wait before sending", 2, 1, 5, 1, " s"));
+        BY_MOD.put("auto_text", at);
 
         List<Opt> ai = new ArrayList<>();
         ai.add(choice("style", "Indicator", 0, "Vanilla crosshair", "Fhasix meter"));

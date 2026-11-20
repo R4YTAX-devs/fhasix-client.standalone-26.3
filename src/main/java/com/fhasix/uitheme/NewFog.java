@@ -1,6 +1,13 @@
 package com.fhasix.uitheme;
 
+import java.io.File;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.fog.FogData;
+import net.minecraft.client.renderer.fog.FogRenderer;
 import org.joml.Vector4f;
 
 /**
@@ -132,5 +139,132 @@ public final class NewFog {
             lastEnvEnd = v;
         }
         return v;
+    }
+
+    // ------------------------------------------------------------------------------------------------
+    // 26.3 hook: FogRenderer.setupFog(...) returns the finished fog data. NewFogMixin hands it here at the end of
+    // setupFog, so colour and distances are changed in the same object the game then uses for the world, the sky
+    // and the clouds. (The old hook targeted a private method that does not exist in 26.3.)
+    // ------------------------------------------------------------------------------------------------
+
+    private static int hookHits = 0;
+    private static boolean diagWritten = false;
+    private static boolean fieldsResolved = false;
+    private static Field fEnvStart;
+    private static Field fEnvEnd;
+    private static Field fRdStart;
+    private static Field fRdEnd;
+    private static Field fSkyEnd;
+    private static Field fCloudEnd;
+
+    private static Field field(Class<?> k, String name) {
+        try {
+            return k.getField(name);
+        } catch (Throwable t) {
+            try {
+                Field f = k.getDeclaredField(name);
+                f.setAccessible(true);
+                return f;
+            } catch (Throwable t2) {
+                return null;
+            }
+        }
+    }
+
+    private static float get(Field f, Object o, float fallback) {
+        try {
+            return f == null ? fallback : f.getFloat(o);
+        } catch (Throwable t) {
+            return fallback;
+        }
+    }
+
+    private static void set(Field f, Object o, float v) {
+        try {
+            if (f != null) {
+                f.setFloat(o, v);
+            }
+        } catch (Throwable t) {
+            // field is not a float in this version
+        }
+    }
+
+    /** Called at the end of FogRenderer.setupFog with whatever it returned. */
+    public static void applyData(Object data) {
+        try {
+            applyDataImpl(data);
+        } catch (Exception | LinkageError t) {
+            NewSafe.failed("fog", t);
+        }
+    }
+
+    private static void applyDataImpl(Object data) {
+        hookHits++;
+        if (!diagWritten) {
+            diagWritten = true;
+            writeDiag(data);
+        }
+        if (!(data instanceof FogData fd)) {
+            return;
+        }
+        boolean custom = active();
+        if (!custom && !optimizer()) {
+            return;
+        }
+        if (!fieldsResolved) {
+            fieldsResolved = true;
+            Class<?> k = fd.getClass();
+            fEnvStart = field(k, "environmentalStart");
+            fEnvEnd = field(k, "environmentalEnd");
+            fRdStart = field(k, "renderDistanceStart");
+            fRdEnd = field(k, "renderDistanceEnd");
+            fSkyEnd = field(k, "skyEnd");
+            fCloudEnd = field(k, "cloudEnd");
+        }
+        // distances first (the environmental end feeds the sky / cloud end below)
+        set(fEnvStart, fd, distance(get(fEnvStart, fd, 0f), 0));
+        set(fEnvEnd, fd, distance(get(fEnvEnd, fd, 0f), 1));
+        set(fRdStart, fd, distance(get(fRdStart, fd, 0f), 2));
+        set(fRdEnd, fd, distance(get(fRdEnd, fd, 0f), 3));
+        if (fSkyEnd != null) {
+            set(fSkyEnd, fd, skyEnd(get(fSkyEnd, fd, 0f)));
+        }
+        if (fCloudEnd != null) {
+            set(fCloudEnd, fd, cloudEnd(get(fCloudEnd, fd, 0f)));
+        }
+        if (fd.color != null) {
+            Vector4f nc = color(new Vector4f(fd.color));
+            if (nc != null) {
+                fd.color.set(nc.x, nc.y, nc.z, nc.w);
+            }
+        }
+    }
+
+    /** One small file for debugging: proves the hook ran and lists the real fog classes of this Minecraft version. */
+    private static void writeDiag(Object data) {
+        try {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Fhasix fog hook diagnostics (26.3)\n");
+            sb.append("hook hit: yes (setupFog returned ").append(data == null ? "null" : data.getClass().getName()).append(")\n\n");
+            sb.append("FogRenderer methods:\n");
+            for (Method m : FogRenderer.class.getDeclaredMethods()) {
+                sb.append("  ").append(m.toGenericString()).append('\n');
+            }
+            if (data != null) {
+                sb.append("\nFog data fields (").append(data.getClass().getName()).append("):\n");
+                for (Field f : data.getClass().getDeclaredFields()) {
+                    sb.append("  ").append(f.getType().getSimpleName()).append(' ').append(f.getName()).append('\n');
+                }
+            }
+            File out = new File(Minecraft.getInstance().gameDirectory, "fhasix-fog-diag.txt");
+            Files.write(out.toPath(), sb.toString().getBytes(StandardCharsets.UTF_8));
+        } catch (Throwable t) {
+            // diagnostics only
+        }
+    }
+
+    /** How many times the 26.3 hook ran (0 = the hook did not attach). */
+    public static int hookHits() {
+        return hookHits;
     }
 }

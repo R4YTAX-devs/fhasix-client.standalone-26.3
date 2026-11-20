@@ -2,61 +2,25 @@ package com.fhasix.uitheme.mixin;
 
 import com.fhasix.uitheme.NewFog;
 import net.minecraft.client.renderer.fog.FogRenderer;
-import org.joml.Vector4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * Custom Fog: changes the fog colour and the fog start/end distances as they are written into the
- * fog uniform buffer.
+ * Custom Fog (26.3). FogRenderer.setupFog(...) builds the fog data for the frame and returns it; Iris and
+ * NeoForge hook the same point. At the end of that method the fog data is passed to NewFog, which changes
+ * the colour, the start / end distances and the sky / cloud end in place.
  *
- * NOTE FOR WHOEVER COMPILES THIS: written without being able to compile. The target is the fog
- * renderer's private method that writes colour + environmentalStart/End + renderDistanceStart/End
- * (+ sky/cloud end) into the buffer - find the real name/descriptor in 1.21.11 and fix the "method"
- * strings. The float arguments are modified by ordinal (0 = environmental start, 1 = environmental
- * end, 2 = render distance start, 3 = render distance end, 4 = sky end, 5 = cloud end). Sky end and
- * cloud end are pulled in to the world fog's end while a custom colour is on (see NewFog) so the sky and the
- * clouds take the colour as well. require = 0, so a wrong target just disables the mod instead of crashing.
+ * The handler takes the return value as Object on purpose: whatever setupFog returns, nothing here can fail with
+ * a wrong cast (NewFog only touches it when it really is the fog data). require = 0, so if the method were ever
+ * renamed the mod just logs it instead of crashing.
  */
 @Mixin(FogRenderer.class)
 public abstract class NewFogMixin {
 
-    private static final String WRITE =
-            "applyFog(Ljava/nio/ByteBuffer;ILorg/joml/Vector4f;FFFFFF)V";
-
-    @ModifyVariable(method = WRITE, at = @At("HEAD"), argsOnly = true, require = 0)
-    private Vector4f fhasix$color(Vector4f color) {
-        return NewFog.color(color);
-    }
-
-    @ModifyVariable(method = WRITE, at = @At("HEAD"), argsOnly = true, ordinal = 0, require = 0)
-    private float fhasix$envStart(float v) {
-        return NewFog.distance(v, 0);
-    }
-
-    @ModifyVariable(method = WRITE, at = @At("HEAD"), argsOnly = true, ordinal = 1, require = 0)
-    private float fhasix$envEnd(float v) {
-        return NewFog.distance(v, 1);
-    }
-
-    @ModifyVariable(method = WRITE, at = @At("HEAD"), argsOnly = true, ordinal = 2, require = 0)
-    private float fhasix$renderStart(float v) {
-        return NewFog.distance(v, 2);
-    }
-
-    @ModifyVariable(method = WRITE, at = @At("HEAD"), argsOnly = true, ordinal = 3, require = 0)
-    private float fhasix$renderEnd(float v) {
-        return NewFog.distance(v, 3);
-    }
-
-    @ModifyVariable(method = WRITE, at = @At("HEAD"), argsOnly = true, ordinal = 4, require = 0)
-    private float fhasix$skyEnd(float v) {
-        return NewFog.skyEnd(v);
-    }
-
-    @ModifyVariable(method = WRITE, at = @At("HEAD"), argsOnly = true, ordinal = 5, require = 0)
-    private float fhasix$cloudEnd(float v) {
-        return NewFog.cloudEnd(v);
+    @Inject(method = "setupFog", at = @At("RETURN"), require = 0)
+    private void fhasix$fog(CallbackInfoReturnable<Object> cir) {
+        NewFog.applyData(cir.getReturnValue());
     }
 }

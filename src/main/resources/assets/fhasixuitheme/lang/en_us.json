@@ -4,5 +4,7 @@
   "key.fhasixuitheme.modmenu": "Open Mod Launcher",
   "key.fhasixuitheme.freelook": "Freelook (hold)",
   "key.fhasixuitheme.zoom": "Zoom (hold)",
-  "key.category.fhasixuitheme.modmenu": "Fhasix Mod Menu"
+  "key.category.fhasixuitheme.modmenu": "Fhasix Mod Menu",
+  "key.fhasixuitheme.waypoint_add": "Save Waypoint Here",
+  "key.fhasixuitheme.waypoint_list": "Open Waypoint List"
 }

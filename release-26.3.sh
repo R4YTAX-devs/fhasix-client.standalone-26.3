@@ -1,8 +1,9 @@
 # FHASIX Minecraft 26.3: build mod + loader, publish to the GitHub repo, then VERIFY the upload.
-# Usage: bash release-26.3.sh 5.6        (Termux; everything else is set up automatically)
+# Usage: bash release-26.3.sh 5.7          build + publish to GitHub (the real release)
+#        bash release-26.3.sh 5.7 test     build ONLY, copy the jar to /sdcard/codetest, push nothing
 set -eo pipefail
 cd "$(dirname "$0")"
-V="${1:-5.6}"; V="${V#v}"; N="$V"
+V="${1:-5.7}"; V="${V#v}"; N="$V"
 JV=25
 REPO="$HOME/fhasix-client.standalone-26.3"
 URL="https://github.com/R4YTAX-devs/fhasix-client.standalone-26.3.git"
@@ -25,8 +26,19 @@ bash ./resolve-api.sh || true
 # 1) compile the mod
 MV="$N.0.0"; [ "$(echo "$N" | tr -cd . | wc -c)" -ge 2 ] && MV="$N.0"
 sed -i "s/^mod_version=.*/mod_version=$MV/" gradle.properties
-./gradlew build --no-daemon 2>&1 | tee build-output.log
+if ! ./gradlew build --no-daemon 2>&1 | tee build-output.log; then
+  echo; echo "===== COMPILE ERRORS (send me these lines) ====="
+  grep -E "error:" -A2 build-output.log | head -120
+  exit 1
+fi
 MOD=$(ls -t build/libs/*.jar | grep -v -e '-sources' -e '-dev' | head -1)
+
+# test mode: stop here (nothing is pushed, the loader is not built)
+if [ "${2:-}" = "test" ]; then
+  mkdir -p /sdcard/codetest && cp "$MOD" /sdcard/codetest/
+  echo; echo "TEST BUILD OK: copied $(basename "$MOD") to /sdcard/codetest - nothing was pushed to GitHub."
+  exit 0
+fi
 
 # 2) compile the loader
 ./gradlew -p loader build --no-daemon 2>&1 | tee loader-build-output.log

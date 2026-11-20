@@ -16,11 +16,11 @@ import net.minecraft.resources.Identifier;
  */
 final class NewUi {
 
-    /** Icon atlas: 5 columns x 10 rows of 128px cells (640x1280). */
+    /** Icon atlas: 5 columns x 10 rows of 128px cells (640x1792). */
     static final Identifier ATLAS = Identifier.fromNamespaceAndPath("fhasixuitheme", "textures/gui/new_mod_icons.png");
     static final int CELL = 128;
     static final int ATLAS_W = 640;
-    static final int ATLAS_H = 1536;
+    static final int ATLAS_H = 1792;
     static final int COLS = 5;
 
     // atlas cell indexes

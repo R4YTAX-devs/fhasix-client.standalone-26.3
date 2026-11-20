@@ -89,3 +89,9 @@ Fix with the smallest change and keep behavior.
 - 26.3: same, plus threaded chunk building, and 4x anisotropic filtering for sharp far ground (Extra Boost / Texture Detail).
 - Culling: armor stands/items beyond 8 blocks, frames/paintings 12, mobs 20 (players stay 48) at the fastest level.
 - One-time: Frame Rate (unlimited), Texture Detail, Particles Medium and Extra Boost switched on for existing players.
+
+
+## 5.7
+- New: Motion Blur (frame-rate independent, HUD stays sharp), Hit Color, No Hurt Cam, Low Fire, Minimap, Waypoints (B = save, N = list), Discord Rich Presence (PC only), Account Switcher (offline names, click your name on the title screen).
+- Auto Text now works (GG when a game ends, optional good luck at the start).
+- 26.3: Custom Fog hooked into the real fog renderer; Block Overlay rebuilt (drawn through the HUD, works on Vulkan too); writes fhasix-fog-diag.txt and fhasix-blur-diag.txt for debugging.
