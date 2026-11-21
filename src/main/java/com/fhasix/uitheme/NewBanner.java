@@ -19,7 +19,7 @@ public class NewBanner extends Button {
     public static final int NEWS = 1;
 
     /** News card text. Edit these two lines for each update. */
-    private static final String NEWS_TITLE = "Update 5.7";
+    private static final String NEWS_TITLE = "Update 5.8";
     private static final String NEWS_LINE = "Motion Blur - Minimap - Waypoints";
 
     /** The same points gem the Store and Cosmetics use. */

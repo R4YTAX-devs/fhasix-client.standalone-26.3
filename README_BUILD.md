@@ -1,4 +1,4 @@
-# FHASIX Client 26.3 (Minecraft 26.3, Fabric) - full source, version 5.4
+# FHASIX Client 26.3 (Minecraft 26.3, Fabric) - full source, version 5.8
 
 Contents
 - `src/`   the client mod (Java 25, Fabric Loom, Fabric API 0.166.2+26.3)

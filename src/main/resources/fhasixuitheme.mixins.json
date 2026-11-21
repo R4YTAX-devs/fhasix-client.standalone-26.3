@@ -30,7 +30,8 @@
     "NewParticleMixin",
     "NewEntityCullMixin",
     "NewChunkDataMixin",
-    "NewOwnNameTagMixin"
+    "NewOwnNameTagMixin",
+    "NewPostPassMixin"
   ],
   "injectors": {
     "defaultRequire": 0

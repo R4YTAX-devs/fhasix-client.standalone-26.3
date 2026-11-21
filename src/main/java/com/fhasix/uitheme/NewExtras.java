@@ -3,7 +3,7 @@ package com.fhasix.uitheme;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.KeyMapping;
 
-/** Update 5.7 features: starts Auto Component, Motion Blur, Hit Color, Waypoints, Minimap and Discord Rich Presence. */
+/** Update 5.7 / 5.8 features: starts Auto Component, Motion Blur, Hit Color, Waypoints, Minimap and Discord Rich Presence. */
 final class NewExtras {
 
     private NewExtras() {

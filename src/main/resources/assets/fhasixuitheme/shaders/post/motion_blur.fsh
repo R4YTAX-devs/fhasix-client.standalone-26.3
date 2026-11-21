@@ -1,20 +1,18 @@
 #version 330
+#extension GL_ARB_separate_shader_objects : require
+
+// Fhasix Motion Blur (Minecraft 26.3). 26.3 compiles every shader with ShaderC (OpenGL and Vulkan alike), so every
+// input and output needs an explicit location and #version must stay the first line.
 
 uniform sampler2D InSampler;
 uniform sampler2D PrevSampler;
-
-in vec2 texCoord;
-
-layout(std140) uniform SamplerInfo {
-    vec2 OutSize;
-    vec2 InSize;
-};
 
 layout(std140) uniform FhasixBlur {
     float BlendFactor;
 };
 
-out vec4 fragColor;
+layout(location = 0) in vec2 texCoord;
+layout(location = 0) out vec4 fragColor;
 
 // One 8-bit step. Blending in an 8-bit buffer rounds tiny differences to nothing and would leave a faint ghost of
 // the old frame on screen forever, so a pixel that did not move is always pushed at least one step to the new frame.

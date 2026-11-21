@@ -167,6 +167,7 @@ final class NewModOptions {
 
         List<Opt> mb = new ArrayList<>();
         mb.add(slider("strength", "Blur strength", 55, 10, 90, 5, "%"));
+        mb.add(toggle("lowfps", "Less blur under 40 FPS", true));
         BY_MOD.put("motion_blur", mb);
 
         List<Opt> wpo = new ArrayList<>();

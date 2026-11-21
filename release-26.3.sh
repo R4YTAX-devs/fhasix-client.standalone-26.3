@@ -1,9 +1,9 @@
 # FHASIX Minecraft 26.3: build mod + loader, publish to the GitHub repo, then VERIFY the upload.
-# Usage: bash release-26.3.sh 5.7          build + publish to GitHub (the real release)
-#        bash release-26.3.sh 5.7 test     build ONLY, copy the jar to /sdcard/codetest, push nothing
+# Usage: bash release-26.3.sh 5.8          build + publish to GitHub (the real release)
+#        bash release-26.3.sh 5.8 test     build ONLY, copy the jar to /sdcard/codetest, push nothing
 set -eo pipefail
 cd "$(dirname "$0")"
-V="${1:-5.7}"; V="${V#v}"; N="$V"
+V="${1:-5.8}"; V="${V#v}"; N="$V"
 JV=25
 REPO="$HOME/fhasix-client.standalone-26.3"
 URL="https://github.com/R4YTAX-devs/fhasix-client.standalone-26.3.git"

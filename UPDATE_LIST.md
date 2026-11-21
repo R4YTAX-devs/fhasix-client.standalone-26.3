@@ -95,3 +95,7 @@ Fix with the smallest change and keep behavior.
 - New: Motion Blur (frame-rate independent, HUD stays sharp), Hit Color, No Hurt Cam, Low Fire, Minimap, Waypoints (B = save, N = list), Discord Rich Presence (PC only), Account Switcher (offline names, click your name on the title screen).
 - Auto Text now works (GG when a game ends, optional good luck at the start).
 - 26.3: Custom Fog hooked into the real fog renderer; Block Overlay rebuilt (drawn through the HUD, works on Vulkan too); writes fhasix-fog-diag.txt and fhasix-blur-diag.txt for debugging.
+
+## 5.8 (Minecraft 26.3 only)
+- Motion Blur rebuilt for 26.3: shows again, smooth at any frame rate (the trail length is kept in milliseconds, it fades out by itself at very low FPS instead of ghosting), HUD stays sharp, nothing is drawn while it is off. Works on OpenGL and Vulkan.
+- New option "Less blur under 40 FPS" (on by default). fhasix-blur-diag.txt in the game folder lists what the blur found on your Minecraft build.
